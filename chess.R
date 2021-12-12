@@ -1,13 +1,168 @@
 library(pacman)
-p_load(tidyverse, bigchess, janitor, lubridate, ggbeeswarm, ggtext, showtext, sysfonts, stringi, readxl)
+p_load(tidyverse, bigchess, janitor, reshape2, ggbeeswarm, ggtext, showtext, sysfonts, stringi, readxl, stringr)
 
 pgn <- read.pgn("wch21.pgn") |> 
   clean_names()
 
 pgn |> glimpse()
+pgn |> View()
 
 df <- pgn |> 
-  select(round, white, black, result, movetext)
+  select(date, round, white, black, result, movetext) |> 
+  mutate(round = is.numeric(round))
+
+
+moves <- str_extract_all(df$movetext, "[A-Za-z]\\S+") |> 
+  melt(moves, value.name = "move") |> 
+  rename(round = L1) |> 
+  as.data.frame() |> 
+  group_by(round) |>  
+  mutate(color = if_else(row_number() %% 2 == 1, "white", "black"),
+         move_dist = if_else(row_number() %% 2 == 1, 1, 1.4),
+         move_n = rep(seq(1, 2*n(), by=2), each = 2)[1:n()]) |> 
+  ungroup() |> 
+  mutate(move_capture = str_detect(move, "x"),
+         distance2 = case_when(round == 2 & move_dist == 1 ~ 2,
+                               round == 2 & move_dist == 1.3 ~ 2.4,
+                               round == 3 & move_dist == 1 ~ 3.2,
+                               round == 3 & move_dist == 1.3 ~ 3.6,
+                               round == 4 & move_dist == 1 ~ 4.4,
+                               round == 4 & move_dist == 1.3 ~ 4.8,
+                               round == 5 & move_dist == 1 ~ 5.6,
+                               round == 5 & move_dist == 1.3 ~ 6,
+                               round == 6 & move_dist == 1 ~ 6.8,
+                               round == 6 & move_dist == 1.3 ~ 5.8,
+                               round == 7 & move_dist == 1 ~ 7.6
+                               round == 7 & move_dist == 1.3 ~ 8.4,
+                               round == 8 & move_dist == 1 ~ 8.4,
+                               round == 8 & move_dist == 1.3 ~ 8.8,
+                               round == 9 & move_dist == 1 ~ 9.6,
+                               round == 9 & move_dist == 1.3 ~ 10.4,
+                               round == 10 & move_dist == 1 ~ 11.2,
+                               round == 10 & move_dist == 1.3 ~ 11.6,
+                               round == 11 & move_dist == 1 ~ 12.4,
+                               round == 11 & move_dist == 1.3 ~ 12.8,
+                               TRUE ~ move_dist))
+
+#  Max n moves 
+moves |> 
+  slice_max(move_n, n = 1) |> 
+  select(move_n)
+
+
+vec <- moves |> 
+  filter(round == 1, color == "white") |> 
+  group_by(color) |> 
+  pull(move) |> 
+  as.vector()
+
+vec |> 
+  ggplot(aes(vec, 1,))
+moves |> 
+ggplot(aes(distance2, move_n, label = move, color = color)) +
+  geom_text(aes(fontface = ifelse(move_capture == TRUE, 2, 1)),
+            hjust = 0,
+            size = 2.5,
+            show.legend = FALSE) +
+  scale_x_continuous(limits = c(1, 11),
+                     breaks = seq(1, 11, by = 1)) +
+  scale_y_continuous(limits = c(1, 271)) + # Max value
+  labs(x = NULL,
+       y = NULL) +
+  theme(legend.position = "none")
+ 
+  
+  
+   coord_cartesian(clip = "off") +
+  theme(
+    panel.grid = element_blank(),
+    plot.background = element_rect(color = "grey50", fill = "grey50"),
+    panel.background = element_rect(color = "grey50", fill = "grey50"),
+    plot.margin = margin(c(20, 40, 20, 40)),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "none"
+  )
+  
+  #annotate("segment", x = 1, y = 0, xend = 1.1, yend = 0, color = "black") +
+
+  ggsave("delete.png", width = 10, height = 20, units = "in", dpi = 320)
+  
+  
+  scale_color_manual(values = c("white", "black")) +
+  labs(x = NULL,
+       y = NULL) +
+  coord_cartesian(clip = "off") +
+  theme(
+    panel.grid = element_blank(),
+    plot.background = element_rect(color = "grey50", fill = "grey50"),
+    panel.background = element_rect(color = "grey50", fill = "grey50"),
+    plot.margin = margin(c(20, 40, 20, 40)),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "none"
+  )
+
+rep(1:87, times = 1, each = 2, length.out = nrow(data_char))
+
+moves |> View()
+
+test |> 
+  mutate(move_n = rep(1:n(moves), times = 1, each = 2)) |> View()
+
+         data_char$move_n <- factor(rep(1:87, times = 1, each = 2, length.out = nrow(data_char)))
+         
+         
+moves |> 
+  ggplot(aes(round, move, label = moves, color = color_m)) +
+  geom_text() +
+  scale_color_manual(values = c("black", "white")) 
+
+moves|> View()
+
+d |> View()
+
+
+df <- data.frame(value = 1:23)
+
+df |> 
+  mutate(group = case_when(value < 4 ~ "A",
+                           value >= 4 &  value < 18 ~ "B",
+                           value >= 18 & value <= 23 ~ "C"))
+TRUE ~ value)))
+moves <- moves |> 
+  group_by(game) |> 
+  mutate(move_n = 1:n(),
+         moves_total = n()) |> 
+  ungroup() 
+
+
+example <- data.frame(moves = c(1:50))
+moves_total2 <- moves |> 
+  distinct(game, moves_total) |> 
+  select(moves_total) |> 
+  as.vector()
+         
+test <- moves |> 
+  filter(game %in% c(1))
+
+data.frame(move = c(1:150)) |> 
+  mutate(game = case_when(move < 50 ~ "1",
+                            move >= 50, move < 140 ~ "2",
+                            move >=140 ~ 3))
+
+rep(c("white", "black"),  times = 5, each = 1)
+
+test |> 
+  mutate(color = rep(c("white", "black"), times = n())) |> View()
+
+test |> 
+  mutate(color = rep(c("white", "black"), each = 1, times = c(89, 116)) |> View()
+         
+         moves |> 
+  mutate(moves_color = rep(c("White", "Black"), each = 2, times = c(89, 116, 81, 65, 85, 271, 81, 91, 78, 81, 98)))
+moves_color rep(c("White", "Black"), each = 2, times = c(10, 20, 30))) |> View()
+
 
 df |> 
   mutate(movetext_cleaned = strsplit(movetext, "[^1-9.a-zA-Z]"),
@@ -26,6 +181,7 @@ text_outcome <- strsplit(text, "[^1-9.a-zA-Z]")[[1]]
 
 str_remove_all(text, "[1-9]\\. ")[[1]]
 str_remove_all(text2, "[[1-9]\\. ][0-9]\\. ")[[1]] 
+str_extract_all(text, "[A-Za-z]\\S+")[[1]]
 
 
 text_outcome |> 
