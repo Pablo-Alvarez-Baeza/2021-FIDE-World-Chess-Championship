@@ -1,93 +1,99 @@
 library(pacman)
 p_load(tidyverse, bigchess, janitor, reshape2, ggbeeswarm, ggtext, showtext, sysfonts, stringi, readxl, stringr)
 
-pgn <- read.pgn("wch21.pgn") |> 
+font_add_google("Lato")
+
+df_raw <- read.pgn("wch21.pgn") |> 
   clean_names()
 
-pgn |> glimpse()
-pgn |> View()
-
-df <- pgn |> 
+df <- df_raw |> 
   select(date, round, white, black, result, movetext) |> 
   mutate(round = is.numeric(round))
-
 
 moves <- str_extract_all(df$movetext, "[A-Za-z]\\S+") |> 
   melt(moves, value.name = "move") |> 
   rename(round = L1) |> 
   as.data.frame() |> 
   group_by(round) |>  
-  mutate(color = if_else(row_number() %% 2 == 1, "white", "black"),
-         move_dist = if_else(row_number() %% 2 == 1, 1, 1.4),
-         move_n = rep(seq(1, 2*n(), by=2), each = 2)[1:n()]) |> 
+  mutate(move_color = factor(if_else(row_number() %% 2 == 1, "white", "black"),
+                             levels = c("white", "black"), ordered = TRUE),
+         move_dist_x = if_else(row_number() %% 2 == 1, 1, 1.1),
+         move_dist_y = as.numeric(rep(1:n(), each =2)[1:n()])) |> 
   ungroup() |> 
   mutate(move_capture = str_detect(move, "x"),
-         distance2 = case_when(round == 2 & move_dist == 1 ~ 2,
-                               round == 2 & move_dist == 1.3 ~ 2.4,
-                               round == 3 & move_dist == 1 ~ 3.2,
-                               round == 3 & move_dist == 1.3 ~ 3.6,
-                               round == 4 & move_dist == 1 ~ 4.4,
-                               round == 4 & move_dist == 1.3 ~ 4.8,
-                               round == 5 & move_dist == 1 ~ 5.6,
-                               round == 5 & move_dist == 1.3 ~ 6,
-                               round == 6 & move_dist == 1 ~ 6.8,
-                               round == 6 & move_dist == 1.3 ~ 5.8,
-                               round == 7 & move_dist == 1 ~ 7.6
-                               round == 7 & move_dist == 1.3 ~ 8.4,
-                               round == 8 & move_dist == 1 ~ 8.4,
-                               round == 8 & move_dist == 1.3 ~ 8.8,
-                               round == 9 & move_dist == 1 ~ 9.6,
-                               round == 9 & move_dist == 1.3 ~ 10.4,
-                               round == 10 & move_dist == 1 ~ 11.2,
-                               round == 10 & move_dist == 1.3 ~ 11.6,
-                               round == 11 & move_dist == 1 ~ 12.4,
-                               round == 11 & move_dist == 1.3 ~ 12.8,
-                               TRUE ~ move_dist))
+         move_dist_x_sep = as.numeric(case_when(round == 2 & move_dist_x == 1 ~ 1.3,
+                               round == 2 & move_dist_x == 1.1 ~ 1.4,
+                               round == 3 & move_dist_x == 1 ~ 1.6,
+                               round == 3 & move_dist_x == 1.1 ~ 1.7,
+                               round == 4 & move_dist_x == 1 ~ 1.9,
+                               round == 4 & move_dist_x == 1.1 ~ 2,
+                               round == 5 & move_dist_x == 1 ~ 2.2,
+                               round == 5 & move_dist_x == 1.1 ~ 2.3,
+                               round == 6 & move_dist_x == 1 ~ 2.5,
+                               round == 6 & move_dist_x == 1.1 ~ 2.6,
+                               round == 7 & move_dist_x == 1 ~ 2.8,
+                               round == 7 & move_dist_x == 1.1 ~ 2.9,
+                               round == 8 & move_dist_x == 1 ~ 3.1,
+                               round == 8 & move_dist_x == 1.1 ~ 3.2,
+                               round == 9 & move_dist_x == 1 ~ 3.4,
+                               round == 9 & move_dist_x == 1.1 ~ 3.5,
+                               round == 10 & move_dist_x == 1 ~ 3.7,
+                               round == 10 & move_dist_x == 1.1 ~ 3.8,
+                               round == 11 & move_dist_x == 1 ~ 4,
+                               round == 11 & move_dist_x == 1.1 ~ 4.1,
+                               TRUE ~ move_dist_x))) 
+  
 
-#  Max n moves 
-moves |> 
-  slice_max(move_n, n = 1) |> 
-  select(move_n)
-
-
-vec <- moves |> 
-  filter(round == 1, color == "white") |> 
-  group_by(color) |> 
-  pull(move) |> 
-  as.vector()
-
-vec |> 
-  ggplot(aes(vec, 1,))
-moves |> 
-ggplot(aes(distance2, move_n, label = move, color = color)) +
+# Basic plot --------------------------------------------------------------
+plot <- moves |> 
+ggplot(aes(move_dist_x_sep, move_dist_y, label = move, color = move_color)) +
   geom_text(aes(fontface = ifelse(move_capture == TRUE, 2, 1)),
             hjust = 0,
-            size = 2.5,
-            show.legend = FALSE) +
-  scale_x_continuous(limits = c(1, 11),
-                     breaks = seq(1, 11, by = 1)) +
-  scale_y_continuous(limits = c(1, 271)) + # Max value
+            size = 1.8,
+            show.legend = FALSE,
+            ) +
   labs(x = NULL,
        y = NULL) +
-  theme(legend.position = "none")
+  scale_x_continuous(limits = c(1, 4.2),
+                     breaks = seq(1, 4.2, by = 0.1))
+  
+plot +
+  coord_cartesian(clip = "off") +
+  annotate("segment", x = 1, y = 0, xend = 1.2, yend = 0, color = "black") +
+  annotate("segment", x = 1.3, y = 0, xend = 1.5, yend = 0, color = "black") +
+  annotate("segment", x = 1.6, y = 0, xend = 1.8, yend = 0, color = "black") +
+  annotate("segment", x = 1.9, y = 0, xend = 2.1, yend = 0, color = "black") +
+  annotate("segment", x = 2.2, y = 0, xend = 2.4, yend = 0, color = "black") +
+  annotate("segment", x = 2.5, y = 0, xend = 2.7, yend = 0, color = "black") +
+  annotate("segment", x = 2.8, y = 0, xend = 3, yend = 0, color = "black") +
+  annotate("segment", x = 3.1, y = 0, xend = 3.3, yend = 0, color = "black") +
+  annotate("segment", x = 3.4, y = 0, xend = 3.6, yend = 0, color = "black") +
+  annotate("segment", x = 3.7, y = 0, xend = 3.9, yend = 0, color = "black") +
+  annotate("segment", x = 4, y = 0, xend = 4.2, yend = 0, color = "black") #+
+  geom_richtext(x = 1, y = -1,
+                fill = "grey50",
+                label.color = NA,
+                label = "<span style='color:black'>Game 1</span><br><span style='color:black'>November 15, 2021</span><br>
+                <span style='color:white'>Nepo </span><span style='color:black'>Carlsen</span><br><span style='color:black'>|</span>",
+                label.padding = unit(c(0.25, 0, 0, 0), "lines"),
+                size = 2,
+                color = "grey75",
+                hjust = 0,
+                family = "Lato")
+  scale_color_manual(values = c("white", "black")) +
+  theme_void(base_family = "Lato") +
+  theme(
+    plot.margin = margin(20, 40, 20, 30),
+    panel.background = element_rect(color = "grey50", fill = "grey50")
+  )
  
   
-  
-   coord_cartesian(clip = "off") +
-  theme(
-    panel.grid = element_blank(),
-    plot.background = element_rect(color = "grey50", fill = "grey50"),
-    panel.background = element_rect(color = "grey50", fill = "grey50"),
-    plot.margin = margin(c(20, 40, 20, 40)),
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
-    legend.position = "none"
-  )
-  
-  #annotate("segment", x = 1, y = 0, xend = 1.1, yend = 0, color = "black") +
-
   ggsave("delete.png", width = 10, height = 20, units = "in", dpi = 320)
   
+  #  Max n moves 
+  moves |> 
+    slice_max(move_n, n = 1) |> 
+    select(move_n)
   
   scale_color_manual(values = c("white", "black")) +
   labs(x = NULL,
@@ -130,6 +136,7 @@ df |>
                            value >= 4 &  value < 18 ~ "B",
                            value >= 18 & value <= 23 ~ "C"))
 TRUE ~ value)))
+
 moves <- moves |> 
   group_by(game) |> 
   mutate(move_n = 1:n(),
@@ -242,7 +249,7 @@ data_char$move_n <- factor(rep(1:87, times = 1, each = 2, length.out = nrow(data
 data_char$move_color <- factor(rep(c("white", "black"), length.out = nrow(data_char)),
                                levels = c("white", "black"),
                                ordered = TRUE)
-data_char$move_dist <- rep(c(1, 1.05), length.out = nrow(data_char))
+data_char$move_dist_y <- rep(c(1, 1.05), length.out = nrow(data_char))
 data_char <- data_char |> 
   mutate(move_capture = str_detect(move, "x"))
   
@@ -260,7 +267,7 @@ t |>
   scale_color_manual(values = c("black", "white")) 
 
 data_char |> 
-  ggplot(aes(move_dist, move_n, label = move, color = move_color)) +
+  ggplot(aes(move_dist_y, move_n, label = move, color = move_color)) +
   geom_text(aes(fontface = ifelse(move_capture == TRUE, 2, 1)),
             hjust = 0,
             size = 2) +
