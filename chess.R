@@ -1,11 +1,30 @@
 library(pacman)
-p_load(tidyverse, bigchess, janitor, reshape2, ggbeeswarm, ggtext, showtext, sysfonts, stringi, readxl, stringr)
+p_load(tidyverse, lubridate, bigchess, janitor, reshape2, ggbeeswarm, ggtext, showtext, sysfonts, stringi, readxl, stringr)
 
 font_add_google("Lato")
 
 df_raw <- read.pgn("wch21.pgn") |> 
   clean_names()
 
+df <- df_raw |> 
+  select(date, round, white, black, result, movetext)
+
+df_text <-  df |> 
+  mutate(date = ymd(date),
+         year = year(date),
+         month = month(date, label = TRUE),
+         day = day(date),
+         date_text = paste(month, day, year),
+         round_text = paste("Game", round),
+         white_text = if_else(white == "Nepomniachtchi, Ian", "Nepo", "Carlsen"),
+         black_text = if_else(black == "Nepomniachtchi, Ian", "Nepo", "Carlsen"),
+         color_text = paste(white_text, black_text),
+         result_text = case_when(result == "1/2-1/2" ~ "|",
+                                 result == "1-0" ~ "⚪",
+                                 result == "0-1" ~ "⚫") ,
+         plot_label = paste(round_text, date_text, color_text, result_text, sep="\n")) |> 
+  select(plot_label)
+   
 df <- df_raw |> 
   select(date, round, white, black, result, movetext) |> 
   mutate(round = is.numeric(round))
@@ -69,24 +88,59 @@ plot +
   annotate("segment", x = 3.1, y = 0, xend = 3.3, yend = 0, color = "black") +
   annotate("segment", x = 3.4, y = 0, xend = 3.6, yend = 0, color = "black") +
   annotate("segment", x = 3.7, y = 0, xend = 3.9, yend = 0, color = "black") +
-  annotate("segment", x = 4, y = 0, xend = 4.2, yend = 0, color = "black") #+
-  geom_richtext(x = 1, y = -1,
-                fill = "grey50",
-                label.color = NA,
-                label = "<span style='color:black'>Game 1</span><br><span style='color:black'>November 15, 2021</span><br>
-                <span style='color:white'>Nepo </span><span style='color:black'>Carlsen</span><br><span style='color:black'>|</span>",
-                label.padding = unit(c(0.25, 0, 0, 0), "lines"),
-                size = 2,
-                color = "grey75",
-                hjust = 0,
-                family = "Lato")
+  annotate("segment", x = 4, y = 0, xend = 4.2, yend = 0, color = "black") +
   scale_color_manual(values = c("white", "black")) +
   theme_void(base_family = "Lato") +
   theme(
     plot.margin = margin(20, 40, 20, 30),
     panel.background = element_rect(color = "grey50", fill = "grey50")
-  )
- 
+  ) +
+  annotate("text", x = 1.1, y = -2, label = df_text$plot_label[1],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 1.4, y = -2, label = df_text$plot_label[2],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 1.7, y = -2, label = df_text$plot_label[3],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 2, y = -2, label = df_text$plot_label[4],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 2.3, y = -2, label = df_text$plot_label[5],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 2.6, y = -2, label = df_text$plot_label[6],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 2.9, y = -2, label = df_text$plot_label[7],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 3.2, y = -2, label = df_text$plot_label[8],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 3.5, y = -2, label = df_text$plot_label[9],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 3.8, y = -2, label = df_text$plot_label[10],
+           size = 2,
+           family = "Lato",
+           fontface = "bold") +
+  annotate("text", x = 4.1, y = -2, label = df_text$plot_label[11],
+           size = 2,
+           family = "Lato",
+           fontface = "bold")
+  
+  
   
   ggsave("delete.png", width = 10, height = 20, units = "in", dpi = 320)
   
