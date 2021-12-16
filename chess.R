@@ -62,6 +62,9 @@ moves <- str_extract_all(df$movetext, "[A-Za-z]\\S+") |>
                                round == 11 & move_dist_x == 1.1 ~ 4.1,
                                TRUE ~ move_dist_x))) 
   
+# Max mov in total = 136
+moves |> 
+  slice_max(move_dist_y, n = 1) |> View()
 
 # Basic plot --------------------------------------------------------------
 plot <- moves |> 
@@ -72,16 +75,16 @@ ggplot(aes(move_dist_x_sep, move_dist_y, label = move, color = move_color)) +
             show.legend = FALSE,
             ) +
   labs(x = NULL,
-       y = NULL) +
+       y = NULL,
+       title = "FIDE CHESS WORLD CHAMPIONSHIP",
+       subtitle = "DUBAI 2021",
+       caption = "Visualization by Pablo Alvarez") +
   scale_x_continuous(limits = c(0.95, 4.2),
-                     breaks = seq(0.95, 4.2, by = 0.1))
+                     breaks = seq(0.95, 4.2, by = 0.1)) 
   
-plot +
-  annotate(geom = "richtext",
-           label = "Round 2<br>Nov 27, 2021<br><span style='color:white'>Carlsen</span></br>
-           Nepo<br>**—**",
-           x = 1.350, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) 
-  
+
+# Final plot --------------------------------------------------------------
+
 
 plot +
   coord_cartesian(clip = "off") +
@@ -100,78 +103,103 @@ plot +
   # Annotating game details
   # Game 1 Nov 26 2021 Nepo Carlsen —
   annotate(geom = "richtext",
-           label = "Round 1<br>Nov 26, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 1**<br>Nov 26, 2021<br><span style='color:white'>Nepo</span>
            <span>Carlsen</span><br>**—**",
-           x = 1.050, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2,
+           x = 1.050, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
            lineheight = 1.5) +
   # Game 2 Nov 27 2021 Carlsen Nepo —
   annotate(geom = "richtext",
-           label = "Round 2<br>Nov 27, 2021<br><span style='color:white'>Carlsen</span>
+           label = "**Round 2**<br>Nov 27, 2021<br><span style='color:white'>Carlsen</span>
            <span>Nepo</span><br>**—**",
-           x = 1.350, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 1.350, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 3 Nov 28 2021 Nepo Carlsen —
   annotate(geom = "richtext",
-           label = "Round 3<br>Nov 28, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 3**<br>Nov 28, 2021<br><span style='color:white'>Nepo</span>
            <span>Carlsen</span><br>**—**",
-           x = 1.650, y = -2.1, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 1.650, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 4 Nov 30 2021 Carlsen Nepo —
   annotate(geom = "richtext",
-           label = "Round 4<br>Nov 27, 2021<br><span style='color:white'>Carlsen</span>
+           label = "**Round 4**<br>Nov 27, 2021<br><span style='color:white'>Carlsen</span>
            <span>Nepo</span><br>**—**",
-           x = 1.950, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 1.950, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 5 Dec 1 2021 Nepo Carlsen —
   annotate(geom = "richtext",
-           label = "Round 5<br>Nov 26, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 5**<br>Nov 26, 2021<br><span style='color:white'>Nepo</span>
            <span>Carlsen</span><br>**—**",
-           x = 2.250, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 2.250, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 6 Dec 3 2021 Carlsen Nepo |
   annotate(geom = "richtext",
-           label = "Round 6<br>Dec 3, 2021<br><span style='color:white'>**Carlsen**</span>
+           label = "**Round 6**<br>Dec 3, 2021<br><span style='color:white'>**Carlsen**</span>
            <span>Nepo</span><br><span style='color:white'>**|**<span>",
-           x = 2.550, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 2.550, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 7 Dec 4 2021 Nepo Carlsen —
   annotate(geom = "richtext",
-           label = "Round 7<br>Dec 4, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 7**<br>Dec 4, 2021<br><span style='color:white'>Nepo</span>
            <span>**Carlsen**</span><br>**—**",
-           x = 2.850, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 2.850, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 8 Dec 5 2021 Carlsen Nepo —
   annotate(geom = "richtext",
-           label = "Round 8<br>Dec 8, 2021<br><span style='color:white'>Carlsen</span>
+           label = "**Round 8**<br>Dec 8, 2021<br><span style='color:white'>Carlsen</span>
            <span>Nepo</span><br>**—**",
-           x = 3.150, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 3.150, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 9 Dec 7 2021 Nepo Carlsen ||
   annotate(geom = "richtext",
-           label = "Round 9<br>Dec 9, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 9**<br>Dec 9, 2021<br><span style='color:white'>Nepo</span>
            <span>**Carlsen**</span><br><span style='color:black'>**|**<span>",
-           x = 3.450, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 3.450, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 10 Dec 8 2021 Carlsen Nepo —
   annotate(geom = "richtext",
-           label = "Round 10<br>Dec 8, 2021<br><span style='color:white'>Carlsen</span>
+           label = "**Round 10**<br>Dec 8, 2021<br><span style='color:white'>Carlsen</span>
            <span>Nepo</span><br>**—**",
-           x = 3.750, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 3.750, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Game 11 Dec 10 2021 Nepo Carlsen —
   annotate(geom = "richtext",
-           label = "Round 11<br>Dec 10, 2021<br><span style='color:white'>Nepo</span>
+           label = "**Round 11**<br>Dec 10, 2021<br><span style='color:white'>Nepo</span>
            <span>**Carlsen**</span><br><span style='color:black'>**|**<span>",
-           x = 4.050, y = -2, fill = NA, label.color = NA, family = "Lato", size = 2) +
+           x = 4.050, y = -2.5, fill = NA, label.color = NA, family = "Lato", size = 2,
+           lineheight = 1.5) +
   # Theme
     scale_color_manual(values = c("white", "black")) +
     theme_void(base_family = "Lato") +
     theme(
-      panel.background = element_rect(color = "grey50", fill = "grey50")
-    ) +
-  # Title
-  annotate(geom ="richtext",
-           label = "FIDE CHESS WORLD CHAMPIONSHIP<br>DUBAI 2021",
-           x = 0.95,
-           y = 150,
-           family = "Lato",
-           fontface = "bold",
-           size = 8,
-           hjust = 0,
-           fill = NA,
-           label.color = "grey50")
+      plot.margin = margin(1, 1, 1, 1),
+      panel.background = element_rect(color = "grey50", fill = "grey50"),
+      plot.background = element_rect(color = "grey50", fill = "grey50"),
+      # Customize title appearance
+      plot.title = element_markdown(
+        color = "black", 
+        size = 20, 
+        face = "bold",
+        hjust = 0,
+        margin = margin(t = 40, l = 20)
+      ),
+      # Customize subtitle appearance
+      plot.subtitle = element_markdown(
+        color = "black", 
+        size = 14, 
+        hjust = 0,
+        margin = margin(t = 5, l = 20)
+      ),
+      # Customize caption appearance
+      plot.caption = element_markdown(
+        color = "black", 
+        size = 6.5,
+        hjust = 0.5,
+        margin = margin(t = -20, b = 30),
+        family = "Lato"
+      )
+    )
+ 
 
 
-ggsave("delete.png", width = 10, height = 20, units = "in", dpi = 320)
+ggsave("fide_chess.png", width = 10, height = 20, units = "in", dpi = 320)
  
