@@ -6,3 +6,4 @@ Carlsen won four games in the match and drew seven for a final match score of 7
 
 The sixth game of the match was the turning point—Carlsen won a historic 136-move game (the longest game in world championship history). After this game, the world champion scored three more wins and two draws to retain his title and win his fifth world championship match.
 
+![](fide_chess.png)
